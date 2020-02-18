@@ -1,4 +1,4 @@
-package com.example.tinder;
+package com.example.tinder.Cards;
 
 import android.content.Context;
 import android.view.LayoutInflater;
@@ -8,9 +8,8 @@ import android.widget.ArrayAdapter;
 import android.widget.ImageView;
 import android.widget.TextView;
 
-import androidx.annotation.NonNull;
-
 import com.bumptech.glide.Glide;
+import com.example.tinder.R;
 
 import java.util.List;
 

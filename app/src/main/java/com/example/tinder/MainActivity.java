@@ -10,6 +10,9 @@ import android.view.View;
 import android.widget.ListView;
 import android.widget.Toast;
 
+import com.example.tinder.Cards.arrayAdapter;
+import com.example.tinder.Cards.cards;
+import com.example.tinder.Matches.MatchesActivity;
 import com.google.firebase.auth.FirebaseAuth;
 import com.google.firebase.auth.FirebaseUser;
 import com.google.firebase.database.ChildEventListener;
@@ -25,7 +28,7 @@ import java.util.List;
 
 public class MainActivity extends AppCompatActivity {
     private cards cards_data[];
-    private arrayAdapter arrayAdapter;
+    private com.example.tinder.Cards.arrayAdapter arrayAdapter;
     private int i;
 
     private FirebaseAuth mAuth;
@@ -196,6 +199,13 @@ public class MainActivity extends AppCompatActivity {
     public void goToSettings(View view) {
 
         Intent intent = new Intent(MainActivity.this, SettingsActivity.class);
+        startActivity(intent);
+        return;
+    }
+
+    public void goToMatches(View view) {
+
+        Intent intent = new Intent(MainActivity.this, MatchesActivity.class);
         startActivity(intent);
         return;
     }
