@@ -16,6 +16,8 @@ import java.util.List;
 
 public class arrayAdapter extends ArrayAdapter<cards> {
 
+    Context context;
+
     public arrayAdapter(Context context, int resourceId, List<cards> items) {
         super(context, resourceId, items);
     }
@@ -30,7 +32,17 @@ public class arrayAdapter extends ArrayAdapter<cards> {
         ImageView image = (ImageView) convertView.findViewById(R.id.image);
 
         name.setText(card_item.getName());
-        Glide.with(getContext()).load(card_item.getProfileImageUrl()).into(image);
+        switch (card_item.getProfileImageUrl()){
+            case "default":
+                Glide.with(convertView.getContext()).load(R.mipmap.ic_launcher).into(image);
+                break;
+            default:
+//                Glide.clear(image);
+                Glide.get(getContext()).clearMemory();
+                Glide.with(convertView.getContext()).load(card_item.getProfileImageUrl()).into(image);
+                break;
+        }
+
 
         return convertView;
     }

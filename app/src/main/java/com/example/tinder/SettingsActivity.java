@@ -29,7 +29,6 @@ import com.google.firebase.storage.FirebaseStorage;
 import com.google.firebase.storage.StorageReference;
 import com.google.firebase.storage.UploadTask;
 
-import java.io.ByteArrayInputStream;
 import java.io.ByteArrayOutputStream;
 import java.io.IOException;
 import java.util.HashMap;
@@ -44,9 +43,9 @@ public class SettingsActivity extends AppCompatActivity {
     private ImageView mProfileImage;
 
     private FirebaseAuth mAuth;
-    private DatabaseReference mCustomerDatabase;
+    private DatabaseReference mUserDatabase;
 
-    private String userId, name, phone, profileImageUrl;
+    private String userId, name, phone, profileImageUrl, userSex;
 
     private Uri resultUri;
 
@@ -55,18 +54,18 @@ public class SettingsActivity extends AppCompatActivity {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_settings);
 
-        String userSex = getIntent().getExtras().getString("userSex");
         mNameField = (EditText) findViewById(R.id.name);
         mPhoneField = (EditText) findViewById(R.id.phone);
 
-        mProfileImage = (ImageView) findViewById(R.id.progileImage);
+        mProfileImage = (ImageView) findViewById(R.id.profileImage);
 
         mBack = (Button) findViewById(R.id.back);
         mConfirm = (Button) findViewById(R.id.confirm);
 
         mAuth = FirebaseAuth.getInstance();
         userId = mAuth.getCurrentUser().getUid();
-        mCustomerDatabase = FirebaseDatabase.getInstance().getReference().child("UserT").child(userSex).child(userId);
+
+        mUserDatabase = FirebaseDatabase.getInstance().getReference().child("UserT").child(userId);
 
         getUserInfo();
         mProfileImage.setOnClickListener(new View.OnClickListener() {
@@ -94,7 +93,7 @@ public class SettingsActivity extends AppCompatActivity {
 
     private void getUserInfo() {
 
-        mCustomerDatabase.addListenerForSingleValueEvent(new ValueEventListener() {
+        mUserDatabase.addListenerForSingleValueEvent(new ValueEventListener() {
             @Override
             public void onDataChange(@NonNull DataSnapshot dataSnapshot) {
                 if (dataSnapshot.exists() && dataSnapshot.getChildrenCount()>0){
@@ -107,9 +106,21 @@ public class SettingsActivity extends AppCompatActivity {
                         phone = map.get("phone").toString();
                         mPhoneField.setText(phone);
                     }
+                    if (map.get("sex") != null){
+                        userSex = map.get("sex").toString();
+                    }
+                    Glide.get(getApplicationContext()).clearMemory();
                     if (map.get("profileImageUrl") != null){
                         profileImageUrl = map.get("profileImageUrl").toString();
-                        Glide.with(getApplication()).load(profileImageUrl).into(mProfileImage);
+                        switch (profileImageUrl){
+                            case "default":
+                                Glide.with(getApplication()).load(R.mipmap.ic_launcher).into(mProfileImage);
+                                break;
+                            default:
+                                Glide.with(getApplication()).load(profileImageUrl).into(mProfileImage);
+                                break;
+                        }
+
                     }
                 }
             }
@@ -129,7 +140,7 @@ public class SettingsActivity extends AppCompatActivity {
         Map userInfo = new HashMap();
         userInfo.put("name", name);
         userInfo.put("phone", phone);
-        mCustomerDatabase.updateChildren(userInfo);
+        mUserDatabase.updateChildren(userInfo);
         if (resultUri != null){
 
             StorageReference filepath = FirebaseStorage.getInstance().getReference().child("profileImages").child(userId);
@@ -155,11 +166,13 @@ public class SettingsActivity extends AppCompatActivity {
                 @Override
                 public void onSuccess(UploadTask.TaskSnapshot taskSnapshot) {
 
-                    Task<Uri> downloadUrl = taskSnapshot.getStorage().getDownloadUrl();  // <Uri> add
+//                    Task<Uri> downloadUrl = taskSnapshot.getStorage().getDownloadUrl();  // <Uri> add
+
+                    Task downloadUrl = taskSnapshot.getMetadata().getReference().getDownloadUrl();
 
                     Map userInfo = new HashMap();
                     userInfo.put("profileImageUrl", downloadUrl.toString());
-                    mCustomerDatabase.updateChildren(userInfo);
+                    mUserDatabase.updateChildren(userInfo);
 
                     finish();
                     return;

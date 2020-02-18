@@ -21,7 +21,7 @@ public class cards {
         return name;
     }
     public void setName(String name){
-        this.userId = name;
+        this.name = name;
     }
 
     public String getProfileImageUrl(){
